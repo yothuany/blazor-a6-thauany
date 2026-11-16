@@ -1,0 +1,31 @@
+<EditForm Model="novo" OnValidSubmit="EnviarProduto">
+    <DataAnnotationsValidator />
+
+    <label for="nomeProduto" class="form-label">Nome</label>
+    <InputText id="nomeProduto" class="form-control" @bind-Value="novo.Nome" />
+    <ValidationMessage For="@(() => novo.Nome)" />
+
+    <label for="precoProduto" class="form-label mt-3">Preço</label>
+    <InputNumber id="precoProduto" class="form-control" @bind-Value="novo.Preco" />
+    <ValidationMessage For="@(() => novo.Preco)" />
+
+    <label for="quantidadeProduto" class="form-label mt-3">Quantidade</label>
+    <InputNumber id="quantidadeProduto" class="form-control" @bind-Value="novo.Quantidade" />
+    <ValidationMessage For="@(() => novo.Quantidade)" />
+
+    <button type="submit" class="btn btn-primary mt-3">Adicionar produto</button>
+</EditForm>
+
+@code {
+    private Produto novo = new();
+
+    [Parameter]
+    public EventCallback<Produto> OnProdutoValido { get; set; }
+
+    private async Task EnviarProduto()
+    {
+        // O componente apenas avisa o pai; quem controla a lista é Produtos.razor.
+        await OnProdutoValido.InvokeAsync(novo);
+        novo = new();
+    }
+}

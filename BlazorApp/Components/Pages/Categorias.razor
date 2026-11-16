@@ -1,0 +1,76 @@
+﻿@page "/categorias"
+
+<h3 class="mb-4">Categorias</h3>
+
+@if (salvo)
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        Categoria cadastrada!
+        <button type="button" class="btn-close" aria-label="Fechar" @onclick="FecharAviso"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="nova" OnValidSubmit="Adicionar" class="card card-body">
+            <DataAnnotationsValidator />
+
+            <label for="nomeCategoria" class="form-label">Nome</label>
+            <InputText id="nomeCategoria" class="form-control" @bind-Value="nova.Nome" />
+            <ValidationMessage For="@(() => nova.Nome)" />
+
+            <label for="quantidadeCategoria" class="form-label mt-3">Quantidade</label>
+            <InputNumber id="quantidadeCategoria" class="form-control" @bind-Value="nova.Quantidade" />
+            <ValidationMessage For="@(() => nova.Quantidade)" />
+
+            <button type="submit" class="btn btn-primary mt-3">Adicionar</button>
+        </EditForm>
+    </div>
+
+    <div class="col-md-8">
+        @if (categorias.Count == 0)
+        {
+            <p class="text-muted">Nenhuma categoria cadastrada.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Quantidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var categoria in categorias)
+                        {
+                            <tr>
+                                <td>@categoria.Nome</td>
+                                <td>@categoria.Quantidade</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private Categoria nova = new();
+    private List<Categoria> categorias = new();
+    private bool salvo;
+
+    private void Adicionar()
+    {
+        categorias.Add(nova);
+        nova = new();
+        salvo = true;
+    }
+
+    private void FecharAviso()
+    {
+        salvo = false;
+    }
+}

@@ -1,0 +1,33 @@
+<table class="table">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">Preço</th>
+            <th scope="col">Quantidade</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Produtos.Count == 0)
+        {
+            <tr>
+                <td colspan="3">Não há produtos cadastrados</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var produto in Produtos)
+            {
+                <tr>
+                    <td>@produto.Nome</td>
+                    <td>R$ @produto.Preco</td>
+                    <td>@produto.Quantidade un.</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<Produto> Produtos { get; set; } = new();
+}
