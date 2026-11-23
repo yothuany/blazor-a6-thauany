@@ -1,4 +1,9 @@
 @page "/produtos"
+@using BlazorApp.Components
+@using BlazorApp.Components.Models
+@using BlazorApp.Data
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<LojaContext> DbFactory
 
 <h3 class="mb-4">Produtos</h3>
 
@@ -10,22 +15,72 @@
     </div>
 
     <div class="col-md-8">
-        @if (produtos.Count == 0)
+        @if (carregando)
+        {
+            <p class="text-muted">Carregando produtos...</p>
+        }
+        else if (produtos.Count == 0)
         {
             <p class="text-muted">Nenhum produto cadastrado.</p>
         }
         else
         {
-            <TabelaProdutos Produtos="produtos" />
+            <TabelaProdutos Produtos="produtos" OnExcluir="ExcluirProduto" />
         }
     </div>
 </div>
 
 @code {
     private List<Produto> produtos = new();
+    private bool carregando = true;
 
-    private void ReceberProduto(Produto produto)
+    protected override async Task OnInitializedAsync()
     {
-        produtos.Add(produto);
+        try
+        {
+            await CarregarProdutos();
+        }
+        finally
+        {
+            carregando = false;
+        }
+    }
+
+    private async Task CarregarProdutos()
+    {
+        // Cada operação usa seu próprio DbContext.
+        await using var contexto = await DbFactory.CreateDbContextAsync();
+
+        produtos = await contexto.Produtos
+            .AsNoTracking()
+            .OrderBy(p => p.Nome)
+            .ToListAsync();
+    }
+
+    private async Task ReceberProduto(Produto produto)
+    {
+        await using var contexto = await DbFactory.CreateDbContextAsync();
+
+        contexto.Produtos.Add(produto);
+        await contexto.SaveChangesAsync();
+
+        await CarregarProdutos();
+    }
+
+    private async Task ExcluirProduto(Produto produto)
+    {
+        await using var contexto = await DbFactory.CreateDbContextAsync();
+
+        var produtoBanco = await contexto.Produtos.FindAsync(produto.Id);
+
+        if (produtoBanco is null)
+        {
+            return;
+        }
+
+        contexto.Produtos.Remove(produtoBanco);
+        await contexto.SaveChangesAsync();
+
+        await CarregarProdutos();
     }
 }

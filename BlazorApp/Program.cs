@@ -1,4 +1,7 @@
 using BlazorApp.Components;
+using BlazorApp.Data;
+using Microsoft.EntityFrameworkCore;
+using MySql.EntityFrameworkCore.Extensions;
 
 namespace BlazorApp
 {
@@ -8,9 +11,19 @@ namespace BlazorApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Adiciona os serviços do Blazor
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+
+            // Recupera a string de conexão do appsettings.json
+            var connectionString = builder.Configuration
+                .GetConnectionString("LojaConnection")
+                ?? throw new InvalidOperationException(
+                    "String de conexão não encontrada.");
+
+            // Registra a fábrica de contextos do Entity Framework
+            builder.Services.AddDbContextFactory<LojaContext>(options =>
+                options.UseMySQL(connectionString));
 
             var app = builder.Build();
 
@@ -18,16 +31,19 @@ namespace BlazorApp
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
-            app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+            app.UseStatusCodePagesWithReExecute(
+                "/not-found",
+                createScopeForStatusCodePages: true);
+
             app.UseHttpsRedirection();
 
             app.UseAntiforgery();
 
             app.MapStaticAssets();
+
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 

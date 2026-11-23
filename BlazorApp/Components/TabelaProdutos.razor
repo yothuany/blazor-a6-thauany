@@ -1,28 +1,29 @@
-<table class="table">
-    <thead class="table-dark">
+@using BlazorApp.Components.Models
+
+<table class="table table-striped">
+    <thead>
         <tr>
-            <th scope="col">Nome</th>
-            <th scope="col">Preço</th>
-            <th scope="col">Quantidade</th>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Quantidade</th>
+            <th>Ações</th>
         </tr>
     </thead>
     <tbody>
-        @if (Produtos.Count == 0)
+        @foreach (var produto in Produtos)
         {
             <tr>
-                <td colspan="3">Não há produtos cadastrados</td>
+                <td>@produto.Nome</td>
+                <td>@produto.Preco.ToString("C")</td>
+                <td>@produto.Quantidade un.</td>
+                <td>
+                    <button type="button"
+                            class="btn btn-danger btn-sm"
+                            @onclick="() => AvisarExclusao(produto)">
+                        Excluir
+                    </button>
+                </td>
             </tr>
-        }
-        else
-        {
-            @foreach (var produto in Produtos)
-            {
-                <tr>
-                    <td>@produto.Nome</td>
-                    <td>R$ @produto.Preco</td>
-                    <td>@produto.Quantidade un.</td>
-                </tr>
-            }
         }
     </tbody>
 </table>
@@ -30,4 +31,12 @@
 @code {
     [Parameter]
     public List<Produto> Produtos { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Produto> OnExcluir { get; set; }
+
+    private Task AvisarExclusao(Produto produto)
+    {
+        return OnExcluir.InvokeAsync(produto);
+    }
 }
